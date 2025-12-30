@@ -10,11 +10,12 @@ namespace FXnRXn
 	/// </summary>
     public class MobileInputAdapter : MonoBehaviour
     {
-	    // ------------------------------------------ Properties -------------------------------------------------------
 	    
-	    #region Singleton
+	    // ------------------------------------------- Singleton -------------------------------------------------------
 	    public static MobileInputAdapter Instance { get; private set; }
-	    #endregion
+	    
+	    
+	    // ------------------------------------------ Properties -------------------------------------------------------
 	    
 	    [Title("Virtual Controls")]
 	    [field: SerializeField] private VirtualJoystick movementJoystick;
@@ -33,11 +34,11 @@ namespace FXnRXn
         private void Awake()
         {
 	        // Auto-detect platform
-// #if UNITY_ANDROID || UNITY_IOS
-// 	        enableMobileControls = true;
-// #else
-// 	        enableMobileControls = false;
-// #endif
+#if UNITY_ANDROID || UNITY_IOS
+	        enableMobileControls = true;
+#else
+	        enableMobileControls = false;
+#endif
 	        
 	        if (Instance == null) Instance = this;
 	        if (movementJoystick == null) movementJoystick = FindFirstObjectByType<VirtualJoystick>();

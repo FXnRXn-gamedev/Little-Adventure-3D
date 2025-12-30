@@ -8,7 +8,7 @@ namespace FXnRXn
 	/// ScriptableObject containing movement parameters
 	/// Allows for easy tweaking and different movement profiles
 	/// </summary>
-	[CreateAssetMenu(fileName = "New Movement Data", menuName = "TopDownRPG/Movement/Movement Data")]
+	[CreateAssetMenu(fileName = "New Movement Data", menuName = "TopDownRPG/Player/Movement Data")]
 	public class MovementData : ScriptableObject
 	{
 		[BoxGroup("Movement")]
@@ -58,6 +58,17 @@ namespace FXnRXn
 
 		[BoxGroup("Animation")]
 		public float animationSmoothTime = 0.1f;
+
+		[BoxGroup("Stunned")] 
+		public bool isStunned = false;
+		
+		[BoxGroup("Hurt")]
+		public bool isHurting = false;
+		[BoxGroup("Hurt")]
+		public float dontHurtTime = 1f;
+
+		[BoxGroup("Death")] 
+		public bool isDead = false;
 	}
 }
 

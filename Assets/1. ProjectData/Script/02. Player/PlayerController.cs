@@ -1,4 +1,6 @@
 using System;
+using Cysharp.Threading.Tasks;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace FXnRXn
@@ -8,31 +10,34 @@ namespace FXnRXn
 	/// </summary>
     [RequireComponent(typeof(PlayerMovementController))]
 	[RequireComponent(typeof(PlayerCollisionHandler))]
-	public class PlayerController : MonoBehaviour
+	public class PlayerController : MonoBehaviour, IDamageable
     {
 	    // ------------------------------------------- Singleton -------------------------------------------------------
 	    
 	    public static PlayerController Instance { get; private set; }
 	    
 	    // ------------------------------------------ Properties -------------------------------------------------------
-
-	    [TriInspector.Title("References")] 
+	    [Title("Data")] 
+	    [field: SerializeField]private PlayerStatData playerStatData;
+	    
+	    
+	    [Title("References")] 
 	    [field: SerializeField] private PlayerMovementController movementController;
 	    [field: SerializeField] private PlayerCollisionHandler collisionHandler;
 	    [field: SerializeField] private PlayerAnimationHandler animationHandler;
 
 	    public bool ReadyToMove { get; private set; } = true;
 
-
+	    private float _currentHealth;
 
 	    
-	    
-	    public PlayerMoveState MoveState { get; set; } = PlayerMoveState.Respawning;
+	    public PlayerMoveState PlayerState { get; set; } = PlayerMoveState.Respawning;
 	    
 	    // ---------------------------------------- Unity Callback -----------------------------------------------------
 	    private void Awake()
 	    {
 		    if (Instance == null) Instance = this;
+		    if (playerStatData == null) playerStatData = Resources.Load<PlayerStatData>("Data/Player/PlayerStatData");
 		    if (movementController == null) movementController = GetComponent<PlayerMovementController>();
 		    if (collisionHandler == null) collisionHandler = GetComponent<PlayerCollisionHandler>();
 		    if (animationHandler == null) animationHandler = GetComponent<PlayerAnimationHandler>();
@@ -41,72 +46,199 @@ namespace FXnRXn
 
 		    movementController?.Init(this);
 		    collisionHandler?.Init(this);
+		    animationHandler?.Init(this);
 
+		    _currentHealth = playerStatData?.baseHealth ?? 100f;
+		    
 		    ReadyToMove = false;
-		    MoveState = PlayerMoveState.Respawning;
+		    PlayerState = PlayerMoveState.Respawning;
 	    }
 
 	    private void Update()
 	    {
-		    if(! ReadyToMove) return;
+			if(IsDead) return;
+			
+		    if (movementController != null)
+		    {
+			    movementController.CheckGroundStatus();
+			    movementController.ApplyGravity();
+			    movementController.DebugInfo();
+		    }
 		    
-		    if (movementController == null) return;
-		    movementController.CheckGroundStatus();
-		    movementController.ApplyGravity();
-		    movementController.UpdateHandleMovement();
-		    movementController.DebugInfo();
+		    if (collisionHandler != null)
+		    {
+			    collisionHandler.HandleStairCollision();
+		    }
 		    
-		    if (collisionHandler == null) return;
-		    collisionHandler.HandleStairCollision();
-		    
-		    if(animationHandler == null) return;
-		    animationHandler.UpdateLocomotionAnimations();
+		    if (animationHandler != null)
+		    {
+			    animationHandler.UpdateLocomotionAnimations();
+		    }
 		    
 		    UpdateMovement();
 	    }
+	    
+	    
+	    // ------------------------------------------ Interface Method -------------------------------------------------
 
-	    // ---------------------------------------- Public Properties --------------------------------------------------
+	    public float CurrentHealth => _currentHealth;
+	    public float MaxHealth => playerStatData?.baseHealth ?? 100f;
+	    public bool IsDead => movementController.GetMovementData?.isDead ?? false;
+	    public void TakeDamage(MonoBehaviour damager, Vector3 direction, float damage, Vector3 hitPoint, Vector3 hitNormal)
+	    {
+		    // Check if already dead or in invulnerability period
+		    if (IsDead || movementController.GetMovementData.isHurting) return;
+		    
+		    // Trigger Hurt State
+		    movementController.GetMovementData.isHurting = true;
+		    // movementController.GetMovementData.dontHurtTime = 1f;
+		    HurtCooldownTimerAsync().Forget();
+		    
+		    // Apply damage
+		    _currentHealth -= damage;
+		    _currentHealth = Mathf.Max(0, _currentHealth);
+			
+		    // Hurt Animation
+		    animationHandler.HurtAnimation();
+
+		    
+		    
+		    // TODO : Apply knockback if needed
+		    // if (direction != Vector3.zero)
+		    // {
+		    //  movementController.ApplyKnockback(direction, damage);
+		    // }
+		    
+		    // Check for death
+		    if (_currentHealth <= 0)
+		    {
+			    Die();
+		    }
+    
+		    // TODO : Visual feedback
+		    // TODO : PlayHitEffect(hitPoint, hitNormal);
+		    // TODO : PlayDamageSound();
+	    }
+
+	    public void Heal(float amount)
+	    {
+		    if (IsDead) return; // Can't heal if dead
+    
+		    _currentHealth += amount;
+		    _currentHealth = Mathf.Min(_currentHealth, MaxHealth); // Clamp to max
+    
+		    // Optional: Visual feedback
+		    // PlayHealEffect();
+		    // PlayHealSound();
+	    }
+	    
+	    public void Stunned()
+	    {
+		    if (IsDead) return; // Already dead
+		    
+		    PlayerState = PlayerMoveState.Stunned;
+		    movementController.GetMovementData.isStunned = true;
+	    }
+
+	    public void Die()
+	    {
+		    if (IsDead) return; // Already dead
+    
+		    _currentHealth = 0;
+		    movementController.GetMovementData.isDead = true;
+		    animationHandler.DeathAnimation();
+    
+		    // Optional: Additional death logic
+		    // DropItems();
+		    // DisableControls();
+		    // PlayDeathAnimation();
+		    // RespawnAfterDelay();
+	    }
+
+	    // ---------------------------------------- Private Properties -------------------------------------------------
+	    
 	    private void UpdateMovement()
 	    {
+		    
 		    // State Update
 		    if (movementController.GetMovementData.isRolling)
 		    {
-			    MoveState = PlayerMoveState.Rolling;
+			    PlayerState = PlayerMoveState.Rolling;
+		    }
+		    else if (movementController.GetMovementData.isHurting)
+		    {
+			    PlayerState = PlayerMoveState.Hurt;
+		    }
+		    else if (movementController.GetMovementData.isDead)
+		    {
+			    PlayerState = PlayerMoveState.Death;
 		    }
 		    else
 		    {
-			    MoveState = MobileInputAdapter.Instance.GetInputMagnitude() > 0.1f
+			    PlayerState = MobileInputAdapter.Instance.GetInputMagnitude() > 0.1f
 				    ? PlayerMoveState.Running
 				    : PlayerMoveState.Idle;
 		    }
 		    
-		    if(! MobileInputAdapter.Instance.EnableMobileControls()) return;
+		    // MoveInput
 		    
-		    if (movementController != null && MobileInputAdapter.Instance != null)
-		    {
-			    Vector2 input = MobileInputAdapter.Instance.GetInputDirection();
-			    movementController.SetMovementInput(input);
+		    if(! ReadyToMove) return;
+		    if(PlayerController.Instance.PlayerState == PlayerMoveState.Death || 
+		       PlayerController.Instance.PlayerState == PlayerMoveState.Stunned) return;
+		    
+		    
 
-			    // Auto-run if joystick is pushed far enough
-			    bool isRunning = MobileInputAdapter.Instance.GetInputMagnitude() > 0.7f;
+		    if (MobileInputAdapter.Instance.EnableMobileControls())
+		    {
+			    if (movementController != null && MobileInputAdapter.Instance != null)
+			    {
+				    Vector2 input = MobileInputAdapter.Instance.GetInputDirection();
+				    movementController.SetMovementInput(input);
+
+				    // Auto-run if joystick is pushed far enough
+				    bool isRunning = MobileInputAdapter.Instance.GetInputMagnitude() > 0.7f;
+				    movementController.SetRunning(isRunning);
+			    }
+		    }
+
+		    if (KeyboardInputHandler.Instance != null)
+		    {
+			    Vector2 input = KeyboardInputHandler.Instance.OnKeyboardUpdateMove();
+			    movementController.SetMovementInput(input);
+			    
+			    bool isRunning = input.magnitude > 0.7f;
 			    movementController.SetRunning(isRunning);
 		    }
 		    
+		    
+		    if(movementController != null) movementController.UpdateHandleMovement();
+		    
+		    
 	    }
 
-	    // ---------------------------------------- Private Properties -------------------------------------------------
-		
+	    private async UniTask HurtCooldownTimerAsync()
+	    {
+		    float hurtStartTime = Time.time;
+		    while (Time.time - hurtStartTime < movementController.GetMovementData.dontHurtTime)
+		    {
+			    await UniTask.Yield();
+		    }
+		    movementController.GetMovementData.isHurting = false;
+	    }
 	    
-		
-	    
+
 
 	    // ------------------------------------------ Helper Method ----------------------------------------------------
 
 	    public PlayerMovementController GetPlayerMovementController => movementController;
 	    public PlayerCollisionHandler GetPlayerCollisionHandler => collisionHandler;
 	    public PlayerAnimationHandler GetPlayerAnimationHandler => animationHandler;
-	    public void SetReadyToMove(bool value) => ReadyToMove = value;
 
+	    public PlayerStatData GetPlayerStatData => playerStatData;
+	    public void SetReadyToMove(bool value) => ReadyToMove = value;
+	    
+	    
+	    
     }
 	
 	[Serializable]
@@ -115,6 +247,12 @@ namespace FXnRXn
 		Respawning,
 		Idle,
 		Running,
-		Rolling
+		Rolling,
+		Attacking,
+		Dashing,
+		Death,
+		Stunned,
+		Hurt
 	}
 }
+

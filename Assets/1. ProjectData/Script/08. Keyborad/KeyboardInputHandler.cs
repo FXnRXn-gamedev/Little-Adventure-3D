@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,21 +7,21 @@ namespace FXnRXn
 {
     public class KeyboardInputHandler : MonoBehaviour
     {
-	    // ------------------------------------------ Properties -------------------------------------------------------
+	    // ------------------------------------------- Singleton -------------------------------------------------------
+	    
+	    public static KeyboardInputHandler Instance { get; private set; }
 
 
   	    // ---------------------------------------- Unity Callback -----------------------------------------------------
-
-	    private void Update()
-	    {
-		    OnUpdateMove();
-	    }
+        private void Awake()
+        {
+	        if (Instance == null) Instance = this;
+        }
+		
     	// ---------------------------------------- Public Properties --------------------------------------------------
 
-	    public void OnUpdateMove()
+	    public Vector2 OnKeyboardUpdateMove()
 	    {
-		    
-		    
 		    float horizontal = 0f;
 		    float vertical = 0f;
 
@@ -30,14 +31,7 @@ namespace FXnRXn
 		    if (Keyboard.current.sKey.isPressed) vertical -= 1f;
 
 		    Vector2 input = new Vector2(horizontal, vertical);
-		    
-		    
-		    PlayerController.Instance.GetPlayerMovementController.SetMovementInput(input);
-
-		    // Auto-run if joystick is pushed far enough
-		    bool isRunning = input.magnitude > 0.7f;
-		    PlayerController.Instance.GetPlayerMovementController.SetRunning(isRunning);
-		    
+		    return input;
 	    }
 
 
