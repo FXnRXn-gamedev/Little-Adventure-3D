@@ -1,0 +1,62 @@
+/* Custom Toolbar Styles */
+
+/* Button Styles */
+.custom-toolbar-button {
+    padding: 4px 8px;
+    margin: 2px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s;
+}
+
+.custom-toolbar-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.custom-toolbar-button:active {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Icon Styles */
+.custom-toolbar-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+/* Dropdown Styles */
+.custom-toolbar-dropdown {
+    min-width: 80px;
+    padding: 4px 8px;
+}
+
+/* Toggle Styles */
+.custom-toolbar-toggle {
+    padding: 4px 8px;
+}
+
+.custom-toolbar-toggle:checked {
+    background-color: rgba(100, 200, 100, 0.3);
+}
+
+/* Separator */
+.custom-toolbar-separator {
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 0 8px;
+}
+
+/* Text Styles */
+.custom-toolbar-text {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.9);
+    -unity-font-style: normal;
+}
+
+/* Container Styles */
+.custom-toolbar-container {
+    flex-direction: row;
+    align-items: center;
+    padding: 2px;
+}
