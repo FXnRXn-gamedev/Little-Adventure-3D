@@ -22,9 +22,10 @@ namespace FXnRXn
 	    
 	    
 	    [Title("References")] 
-	    [field: SerializeField] private PlayerMovementController movementController;
-	    [field: SerializeField] private PlayerCollisionHandler collisionHandler;
-	    [field: SerializeField] private PlayerAnimationHandler animationHandler;
+	    [ReadOnly] [field: SerializeField] private PlayerMovementController movementController;
+	    [ReadOnly] [field: SerializeField] private PlayerCollisionHandler collisionHandler;
+	    [ReadOnly] [field: SerializeField] private PlayerAnimationHandler animationHandler;
+	    [ReadOnly] [field: SerializeField] private WeaponManager weaponManager;
 
 	    public bool ReadyToMove { get; private set; } = true;
 
@@ -41,12 +42,15 @@ namespace FXnRXn
 		    if (movementController == null) movementController = GetComponent<PlayerMovementController>();
 		    if (collisionHandler == null) collisionHandler = GetComponent<PlayerCollisionHandler>();
 		    if (animationHandler == null) animationHandler = GetComponent<PlayerAnimationHandler>();
+		    if (weaponManager == null) weaponManager = GetComponentInChildren<WeaponManager>();
+		    
 		    
 
 
 		    movementController?.Init(this);
 		    collisionHandler?.Init(this);
 		    animationHandler?.Init(this);
+		    weaponManager?.Init();
 
 		    _currentHealth = playerStatData?.baseHealth ?? 100f;
 		    
@@ -234,7 +238,8 @@ namespace FXnRXn
 
 
 	    // ------------------------------------------ Helper Method ----------------------------------------------------
-
+	    
+	    public WeaponManager GetWeaponManager => weaponManager;
 	    public PlayerMovementController GetPlayerMovementController => movementController;
 	    public PlayerCollisionHandler GetPlayerCollisionHandler => collisionHandler;
 	    public PlayerAnimationHandler GetPlayerAnimationHandler => animationHandler;
