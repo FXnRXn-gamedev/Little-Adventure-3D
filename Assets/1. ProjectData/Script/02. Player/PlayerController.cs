@@ -77,8 +77,13 @@ namespace FXnRXn
 		    
 		    UpdateMovement();
 	    }
-	    
-	    
+
+	    private void FixedUpdate()
+	    {
+		    if (animationHandler != null) animationHandler.FixedUpdateLocomotionAnimations();
+	    }
+
+
 	    // ------------------------------------------ Interface Method -------------------------------------------------
 
 	    public float CurrentHealth => _currentHealth;
