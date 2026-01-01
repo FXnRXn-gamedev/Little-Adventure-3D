@@ -237,7 +237,8 @@ namespace FXnRXn
 
 
 	    // ------------------------------------------ Helper Method ----------------------------------------------------
-	    
+
+	    public Vector3 GetCurrentMovement => _currentMovement;
 	    public Vector3 Velocity => _velocity;
 	    public bool IsGrounded => _isGrounded;
 	    public bool IsMoving => _movementInput.magnitude > 0.1f;

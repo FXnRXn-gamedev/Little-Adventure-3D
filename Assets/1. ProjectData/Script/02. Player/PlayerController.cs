@@ -30,6 +30,7 @@ namespace FXnRXn
 	    public bool ReadyToMove { get; private set; } = true;
 
 	    private float _currentHealth;
+	    private Vector2 _input;
 
 	    
 	    public PlayerMoveState PlayerState { get; set; } = PlayerMoveState.Respawning;
@@ -71,7 +72,7 @@ namespace FXnRXn
 		    
 		    if (collisionHandler != null)
 		    {
-			    collisionHandler.HandleStairCollision();
+			    
 		    }
 		    
 		    if (animationHandler != null)
@@ -201,8 +202,8 @@ namespace FXnRXn
 		    {
 			    if (movementController != null && MobileInputAdapter.Instance != null)
 			    {
-				    Vector2 input = MobileInputAdapter.Instance.GetInputDirection();
-				    movementController.SetMovementInput(input);
+				    _input = MobileInputAdapter.Instance.GetInputDirection();
+				    movementController.SetMovementInput(_input);
 
 				    // Auto-run if joystick is pushed far enough
 				    bool isRunning = MobileInputAdapter.Instance.GetInputMagnitude() > 0.7f;
@@ -212,10 +213,10 @@ namespace FXnRXn
 
 		    if (KeyboardInputHandler.Instance != null)
 		    {
-			    Vector2 input = KeyboardInputHandler.Instance.OnKeyboardUpdateMove();
-			    movementController.SetMovementInput(input);
+			    _input = KeyboardInputHandler.Instance.OnKeyboardUpdateMove();
+			    movementController.SetMovementInput(_input);
 			    
-			    bool isRunning = input.magnitude > 0.7f;
+			    bool isRunning = _input.magnitude > 0.7f;
 			    movementController.SetRunning(isRunning);
 		    }
 		    
@@ -246,7 +247,6 @@ namespace FXnRXn
 
 	    public PlayerStatData GetPlayerStatData => playerStatData;
 	    public void SetReadyToMove(bool value) => ReadyToMove = value;
-	    
 	    
 	    
     }

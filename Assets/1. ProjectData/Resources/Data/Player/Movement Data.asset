@@ -35,3 +35,7 @@ MonoBehaviour:
     m_Bits: 4194304
   groundCheckDistance: 0.2
   animationSmoothTime: 0.1
+  isStunned: 0
+  isHurting: 0
+  dontHurtTime: 1
+  isDead: 0

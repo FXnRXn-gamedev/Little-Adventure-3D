@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,6 +15,7 @@ namespace FXnRXn
 	    [field: SerializeField] private LayerMask	pushableLayer;
 	    [field: SerializeField] private LayerMask	enemyLayer;
 	    [field: SerializeField] private LayerMask	obstacleLayer;
+	    [field: SerializeField] private LayerMask	stairLayer;
 
 	    [TriInspector.Title("Stair Settings")]
 	    [field: SerializeField] private float		stepHeight = 0.3f;
@@ -21,6 +23,8 @@ namespace FXnRXn
 	    [field: SerializeField] private float		stepSmooth = 0.2f;
 	    [field: SerializeField] private float		stairSlopeAngle = 45f; // Simulated slope angle
 	    [field: SerializeField] private float		stairTransitionSpeed = 8f;
+	    [field: SerializeField] private float      maxStairAngle = 60f; // Maximum angle for stairs
+	    [field: SerializeField] private float      stairCheckRadius = 0.2f; // Radius for stair dete
 
 	    [TriInspector.Title("Events")]
 	    public UnityEvent<Collider> OnEnemyCollision;
@@ -46,6 +50,13 @@ namespace FXnRXn
 	    private List<ControllerColliderHit> _frameCollisions = new List<ControllerColliderHit>();
 	    private Dictionary<Collider, float> _collisionCooldowns = new Dictionary<Collider, float>();
 	    private const float COLLISION_COOLDOWN = 0.2f;
+	    
+	    // Stair handling fields
+	    private Vector3 _stairMovementAdjustment = Vector3.zero;
+	    private float _stairVerticalOffset = 0f;
+	    private RaycastHit _stairHit;
+	    private bool _isSteppingUp = false;
+	    private float _stepProgress = 0f;
 		
 	    
 
@@ -55,32 +66,22 @@ namespace FXnRXn
 		    _playerController = pc;
 		    if(_controller == null)_controller = GetComponent<CharacterController>();
 		    if (_movementData == null) _movementData = Resources.Load<MovementData>("Data/Player/Movement Data");
-
-		    _stepOffset = _controller.stepOffset;
+		    
 	    }
 
 
     	// ------------------------------------------ Stair Handling ---------------------------------------------------
 
-	    public void HandleStairCollision()
-	    {
-		    
-	
-		}
-	    
-
-
-	    private void HandleStepDown()
-	    {
-		    
-			    
-	    }
-
-
     	// ---------------------------------------- Private Properties -------------------------------------------------
 
 
     	// ------------------------------------------ Helper Method ----------------------------------------------------
+	    
+	    // ---------------------------------------------  GIZMOS  ------------------------------------------------------
 
+	    private void OnDrawGizmosSelected()
+	    {
+		   
 	    }
+    }
     }
