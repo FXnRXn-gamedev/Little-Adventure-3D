@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Triggers;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -25,7 +26,10 @@ namespace FXnRXn
 	    [ReadOnly] [field: SerializeField] private PlayerMovementController movementController;
 	    [ReadOnly] [field: SerializeField] private PlayerCollisionHandler collisionHandler;
 	    [ReadOnly] [field: SerializeField] private PlayerAnimationHandler animationHandler;
+	    [ReadOnly] [field: SerializeField] private PlayerVFXHandler vfxHandler;
 	    [ReadOnly] [field: SerializeField] private WeaponManager weaponManager;
+	    [ReadOnly] [field: SerializeField] private MeleeCombatController meleeCombatController;
+	    [ReadOnly] [field: SerializeField] private PlayerStatSystem playerStatSystem;
 
 	    public bool ReadyToMove { get; private set; } = true;
 
@@ -44,7 +48,9 @@ namespace FXnRXn
 		    if (collisionHandler == null) collisionHandler = GetComponent<PlayerCollisionHandler>();
 		    if (animationHandler == null) animationHandler = GetComponent<PlayerAnimationHandler>();
 		    if (weaponManager == null) weaponManager = GetComponentInChildren<WeaponManager>();
-		    
+		    if (vfxHandler == null) vfxHandler = GetComponent<PlayerVFXHandler>();
+		    if (meleeCombatController == null) meleeCombatController = GetComponent<MeleeCombatController>();
+		    if (playerStatSystem == null) playerStatSystem = GetComponent<PlayerStatSystem>();
 		    
 
 
@@ -52,6 +58,8 @@ namespace FXnRXn
 		    collisionHandler?.Init(this);
 		    animationHandler?.Init(this);
 		    weaponManager?.Init();
+		    vfxHandler?.Init();
+		    playerStatSystem?.Init();
 
 		    _currentHealth = playerStatData?.baseHealth ?? 100f;
 		    
@@ -70,15 +78,9 @@ namespace FXnRXn
 			    movementController.DebugInfo();
 		    }
 		    
-		    if (collisionHandler != null)
-		    {
-			    
-		    }
-		    
-		    if (animationHandler != null)
-		    {
-			    animationHandler.UpdateLocomotionAnimations();
-		    }
+		    if (vfxHandler != null) vfxHandler.UpdateVFX();
+		    if (animationHandler != null) animationHandler.UpdateLocomotionAnimations();
+		    if(playerStatSystem != null) playerStatSystem.UpdatePlayerStat();
 		    
 		    UpdateMovement();
 	    }
@@ -197,28 +199,30 @@ namespace FXnRXn
 		       PlayerController.Instance.PlayerState == PlayerMoveState.Stunned) return;
 		    
 		    
-
-		    if (MobileInputAdapter.Instance.EnableMobileControls())
-		    {
-			    if (movementController != null && MobileInputAdapter.Instance != null)
-			    {
-				    _input = MobileInputAdapter.Instance.GetInputDirection();
-				    movementController.SetMovementInput(_input);
-
-				    // Auto-run if joystick is pushed far enough
-				    bool isRunning = MobileInputAdapter.Instance.GetInputMagnitude() > 0.7f;
-				    movementController.SetRunning(isRunning);
-			    }
-		    }
+		    Vector2 keyboardInput = Vector2.zero;
+		    Vector2 mobileInput = Vector2.zero;
 
 		    if (KeyboardInputHandler.Instance != null)
 		    {
-			    _input = KeyboardInputHandler.Instance.OnKeyboardUpdateMove();
-			    movementController.SetMovementInput(_input);
-			    
-			    bool isRunning = _input.magnitude > 0.7f;
-			    movementController.SetRunning(isRunning);
+			    keyboardInput = KeyboardInputHandler.Instance.OnKeyboardUpdateMove();
 		    }
+
+		    if (MobileInputAdapter.Instance != null && MobileInputAdapter.Instance.EnableMobileControls())
+		    {
+			    mobileInput = MobileInputAdapter.Instance.GetInputDirection();
+		    }
+
+		    // Combine inputs (clamp magnitude to prevent exceeding 1)
+		    _input = (keyboardInput + mobileInput);
+		    if (_input.magnitude > 1f)
+		    {
+			    _input = _input.normalized;
+		    }
+
+		    movementController.SetMovementInput(_input);
+		    bool isRunning = _input.magnitude > 0.7f;
+		    movementController.SetRunning(isRunning);
+		    
 		    
 		    
 		    if(movementController != null) movementController.UpdateHandleMovement();
@@ -239,7 +243,8 @@ namespace FXnRXn
 
 
 	    // ------------------------------------------ Helper Method ----------------------------------------------------
-	    
+		public MeleeCombatController GetMeleeCombatController => meleeCombatController;
+	    public PlayerVFXHandler GetPlayerVFXHandler => vfxHandler;
 	    public WeaponManager GetWeaponManager => weaponManager;
 	    public PlayerMovementController GetPlayerMovementController => movementController;
 	    public PlayerCollisionHandler GetPlayerCollisionHandler => collisionHandler;

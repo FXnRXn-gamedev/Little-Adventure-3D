@@ -54,12 +54,18 @@ namespace FXnRXn
 
 	    private void SetupButtons()
 	    {
-		    if(rollButton != null) rollButton.onClick.AddListener(OnRollPressed);
+		    if (rollButton != null) rollButton.onClick.AddListener(OnRollPressed);
+		    if (attackButton != null) attackButton.onClick.AddListener(OnAttackPressed);
 	    }
 
 	    private void OnRollPressed()
 	    {
-		    PlayerController.Instance.GetPlayerMovementController.RollStartInputPressed();
+		    if (PlayerController.Instance) PlayerController.Instance.GetPlayerMovementController.RollStartInputPressed();
+	    }
+
+	    private void OnAttackPressed()
+	    {
+		    if (PlayerController.Instance) PlayerController.Instance.GetMeleeCombatController.PerformLightAttack();
 	    }
 
 

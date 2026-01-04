@@ -8,14 +8,14 @@ namespace FXnRXn
     {
 	    // ------------------------------------------ Animator Hash ----------------------------------------------------
 	    
-	    public static readonly int GROUNDED_HASH						= Animator.StringToHash("Grounded");
-	    public static readonly int FORWARDSPEDD_HASH					= Animator.StringToHash("ForwardSpeed");
-	    public static readonly int ROLL_HASH							= Animator.StringToHash("Roll");
-	    public static readonly int ANGLEDELTARAD_HASH					= Animator.StringToHash("AngleDeltaRad");
-	    public static readonly int DEATH_HASH							= Animator.StringToHash("Death");
-	    public static readonly int HURT_HASH							= Animator.StringToHash("Hurt");
-	    public static readonly int StateTime_HASH						= Animator.StringToHash("StateTime");
-	    public static readonly int MeleeAttack_HASH						= Animator.StringToHash("MeleeAttack");
+	    public readonly int Grounded_HASH						= Animator.StringToHash("Grounded");
+	    public readonly int ForwardSpeed_HASH					= Animator.StringToHash("ForwardSpeed");
+	    public readonly int Roll_HASH							= Animator.StringToHash("Roll");
+	    public readonly int AngleDeltaRad_HASH					= Animator.StringToHash("AngleDeltaRad");
+	    public readonly int Death_HASH							= Animator.StringToHash("Death");
+	    public readonly int Hurt_HASH							= Animator.StringToHash("Hurt");
+	    public readonly int StateTime_HASH						= Animator.StringToHash("StateTime");
+	    public readonly int MeleeAttack_HASH					= Animator.StringToHash("MeleeAttack");
 	    
 	    // ------------------------------------------ Properties -------------------------------------------------------
 	    
@@ -39,35 +39,38 @@ namespace FXnRXn
 	        if(_animator == null) return;
 	        
 	        // Calculate speed
-	        _animator.SetFloat(FORWARDSPEDD_HASH, PlayerController.Instance.GetPlayerMovementController.CurrentSpeed);
-	        _animator.SetBool(GROUNDED_HASH, PlayerController.Instance.GetPlayerMovementController.IsGrounded);
+	        _animator.SetFloat(ForwardSpeed_HASH, PlayerController.Instance.GetPlayerMovementController.CurrentSpeed);
+	        _animator.SetBool(Grounded_HASH, PlayerController.Instance.GetPlayerMovementController.IsGrounded);
         }
 
         public void FixedUpdateLocomotionAnimations()
         {
 	        _animator.SetFloat(StateTime_HASH, Mathf.Repeat(_animator.GetCurrentAnimatorStateInfo(0).normalizedTime, 1f));
-	        // m_Animator.ResetTrigger(m_HashMeleeAttack);
-	        //
-	        // if (m_Input.Attack && canAttack)
-		       //  m_Animator.SetTrigger(m_HashMeleeAttack);
+	        //_animator.ResetTrigger(MeleeAttack_HASH);
         }
 
         public void RollAnimation()
         {
 	        if(_animator == null) return;
-	        _animator.SetTrigger(ROLL_HASH);
+	        _animator.SetTrigger(Roll_HASH);
         }
 
         public void HurtAnimation()
         {
 	        if(_animator == null) return;
-	        _animator.SetTrigger(HURT_HASH);
+	        _animator.SetTrigger(Hurt_HASH);
         }
 
         public void DeathAnimation()
         {
 	        if(_animator == null) return;
-	        _animator.SetTrigger(DEATH_HASH);
+	        _animator.SetTrigger(Death_HASH);
+        }
+
+        public void LightAttackAnimation()
+        {
+	        if(_animator == null) return;
+	        _animator.SetTrigger(MeleeAttack_HASH);
         }
         
         
