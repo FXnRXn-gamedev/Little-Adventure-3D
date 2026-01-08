@@ -463,8 +463,8 @@
     "m_ObjectId": "053b799e092b4417a1d3f832120b3a36",
     "m_Title": "Dissolve Threshold",
     "m_Position": {
-        "x": -365.0,
-        "y": 104.0
+        "x": -365.0000915527344,
+        "y": 103.99996948242188
     }
 }
 
@@ -1670,8 +1670,8 @@
     "m_ObjectId": "6212bf6f7075449ebc5418c43452d4ff",
     "m_Title": "Section 3: Dissolve Effect",
     "m_Position": {
-        "x": -364.9999694824219,
-        "y": -259.0
+        "x": -365.0000915527344,
+        "y": -259.0000305175781
     }
 }
 
@@ -2288,7 +2288,7 @@
     "m_Title": "Section 4: Main Texture & Mask",
     "m_Position": {
         "x": -1197.0001220703125,
-        "y": 450.0
+        "y": 449.99993896484377
     }
 }
 
@@ -2525,8 +2525,8 @@
     "m_ObjectId": "abbe7c7d8cf2419da93f1bea5d562ceb",
     "m_Title": "Section 2: Noise Texture Sampling",
     "m_Position": {
-        "x": -979.9999389648438,
-        "y": -170.00006103515626
+        "x": -980.0001220703125,
+        "y": -170.00001525878907
     }
 }
 
@@ -2708,8 +2708,8 @@
     "m_ObjectId": "c1b87a68ffa04f78863c5e6000853983",
     "m_Title": "Section 1: UV Scrolling Setup",
     "m_Position": {
-        "x": -1770.0,
-        "y": -240.00006103515626
+        "x": -1770.0001220703125,
+        "y": -240.00001525878907
     }
 }
 

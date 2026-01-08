@@ -9,7 +9,8 @@ namespace FXnRXn
 	/// Base enemy class with stats, behavior, and state management
 	/// Implements IDamageable interface
 	/// </summary>
-	[RequireComponent(typeof(NavMeshAgent))]
+	[RequireComponent(typeof(NavMeshAgent), typeof(Animator), typeof(EnemyStateMachine))]
+	[RequireComponent(typeof(EnemyDetectionSystem))]
     public class EnemyBase : MonoBehaviour
     {
 	    // ------------------------------------------ Properties -------------------------------------------------------
@@ -28,7 +29,7 @@ namespace FXnRXn
 	    // Components
 	    protected NavMeshAgent _agent;
 	    protected EnemyStateMachine _stateMachine;
-	    //protected EnemyDetectionSystem _detectionSystem;
+	    protected EnemyDetectionSystem _detectionSystem;
 
 	    // Stats
 	    protected float _currentHealth;
@@ -51,22 +52,59 @@ namespace FXnRXn
 
   	    // ---------------------------------------- Unity Callback -----------------------------------------------------
 
+        private void Awake()
+        {
+	        if (_agent == null) _agent = GetComponent<NavMeshAgent>();
+	        if (_stateMachine == null) _stateMachine = GetComponent<EnemyStateMachine>();
+	        if (_detectionSystem == null) _detectionSystem = GetComponent<EnemyDetectionSystem>();
+	        if (animator == null) animator = GetComponent<Animator>();
+
+	        InitializeStats();
+	        ConfigureAgent();
+        }
+
         protected virtual void Update()
         {
-	        if (CanAttack())
-	        {
-		        TryAttack();
-		        _lastAttackTime = Time.time;
-	        }
+	        // if (CanAttack())
+	        // {
+		       //  TryAttack();
+		       //  _lastAttackTime = Time.time;
+	        // }
         }
 
 
-        // ---------------------------------------- Public Properties --------------------------------------------------
+        // ------------------------------------------- Initialize ------------------------------------------------------
+
+        protected virtual void InitializeStats()
+        {
+	        if (enemyData == null)
+	        {
+		        Debug.LogError($"[EnemyBase] EnemyData not assigned on {gameObject.name}");
+		        return;
+	        }
+
+	        _maxHealth = enemyData.maxHealth;
+	        _currentHealth = _maxHealth;
+	        _isDead = false;
+        }
+
+        protected virtual void ConfigureAgent()
+        {
+	        if (_agent != null && enemyData != null)
+	        {
+		        _agent.speed = enemyData.moveSpeed;
+		        _agent.angularSpeed = 360f;
+		        _agent.acceleration = 8f;
+		        _agent.stoppingDistance = enemyData.attackRange * 0.8f;
+	        }
+        }
+        
+        // ------------------------------------ IDamageable Implementation ---------------------------------------------
 
 
     	// -------------------------------------------- Combat ---------------------------------------------------------
 	    
-	    protected virtual bool CanAttack()
+	    public virtual bool CanAttack()
 	    {
 		    float distanceToTarget = Vector3.Distance(transform.position, PlayerController.Instance.transform.position);
 		    if (distanceToTarget > 2f) return false;
@@ -75,13 +113,48 @@ namespace FXnRXn
 		    return timeSinceLastAttack >= 1.5f;
 	    }
 
-	    protected virtual void TryAttack()
+	    public virtual void Attack()
+	    {
+		    TryAttack();
+	    }
+
+	    public virtual void TryAttack()
 	    {
 		    IDamageable targetDamageable = PlayerController.Instance.GetComponent<IDamageable>();
 		    if(targetDamageable == null) return;
 		    
 		    Vector3 direction = (PlayerController.Instance.transform.position - transform.position).normalized;
 		    targetDamageable.TakeDamage(this, direction, 5f, PlayerController.Instance.transform.position, Vector3.up);
+	    }
+
+
+	    // ----------------------------------------- Target Management -------------------------------------------------
+
+	    public virtual void SetTarget(Transform target)
+	    {
+		    if (_currentTarget != target)
+		    {
+			    _currentTarget = target;
+			    OnTargetAcquired?.Invoke(target.gameObject);
+
+			    if (showDebugInfo)
+			    {
+				    Debug.Log($"[EnemyBase] {enemyData.enemyName} acquired target: {target.name}");
+			    }
+		    }
+	    }
+	    public virtual void ClearTarget()
+	    {
+		    if (_currentTarget != null)
+		    {
+			    OnTargetLost?.Invoke();
+			    _currentTarget = null;
+
+			    if (showDebugInfo)
+			    {
+				    Debug.Log($"[EnemyBase] {enemyData.enemyName} lost target");
+			    }
+		    }
 	    }
 
 
